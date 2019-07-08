@@ -2006,7 +2006,7 @@ public class GitHubSCMSource extends AbstractGitSCMSource {
                                                        @QueryParameter String apiUri,
                                                        @QueryParameter String rawUrl,
                                                        @QueryParameter String value) {
-            if( isBlank(rawUrl)){
+            if(isBlank(rawUrl)){
                 return Connector.checkScanCredentials(context, apiUri, value);
             }else{
                 return doCheckCredentials(context, rawUrl, value);
@@ -2033,7 +2033,7 @@ public class GitHubSCMSource extends AbstractGitSCMSource {
                 }
                 GitHub github = Connector.connect(apiUri, credentials);
                 if (github.isCredentialValid() || github.isAnonymous()){
-                    sb.append("Credentials ok ");
+                    sb.append("User "+ github.getMyself().getLogin()+ " ");
                 }
                 String path = removeStart(url.getPath(), "/");
                 github.getRepository(removeEnd(path, ".git"));

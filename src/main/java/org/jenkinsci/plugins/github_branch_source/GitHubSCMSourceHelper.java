@@ -34,8 +34,9 @@ import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.apache.commons.lang.StringUtils.*;
-import static org.parboiled.common.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.removeEnd;
 
 @Restricted(NoExternalUse.class)
 public class GitHubSCMSourceHelper {
@@ -65,7 +66,7 @@ public class GitHubSCMSourceHelper {
         GitHubSCMSourceHelper helper = new GitHubSCMSourceHelper();
         if (source == null) return helper;
 
-        if (isBlank(source.rawUrl) &&  isBlank(source.getRepoOwnerInternal()) && isBlank(source.getRepositoryInternal())) {
+        if (isBlank(source.rawUrl) && isBlank(source.getRepoOwnerInternal()) && isBlank(source.getRepositoryInternal())) {
             throw new IllegalArgumentException("Repository URL must not be empty");
         }
 
@@ -92,7 +93,7 @@ public class GitHubSCMSourceHelper {
         if(StringUtils.isNotBlank(source.getRawUrl()) ){
             return new URL (removeEnd(source.getRawUrl(),".git"));
         }else{
-            if( isBlank(source.getApiUri())){
+            if(isBlank(source.getApiUri())){
                 return new URL("https://github.com/" + source.repoOwner+"/"+source.repository);
             }else{
                 String baseURL = removeEnd(source.getApiUri(), "/api/v3");
@@ -134,6 +135,7 @@ public class GitHubSCMSourceHelper {
             }
         } catch (MalformedURLException e) {
             LOGGER.log(Level.WARNING, "Malformed repository URL {0}", rawUrl);
+            throw new IllegalArgumentException("Repository URL not valid:" + rawUrl, e);
 
         }
         return uri;
