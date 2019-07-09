@@ -11,7 +11,7 @@
       <f:entry title="HTTPS URL" field="rawUrl">
         <f:textbox/>
       </f:entry>
-
+      <f:validateButton method="checkRepoURL" title="Validate" progress="Validating access..." with="rawUrl,credentialsId"/>
     </f:nested>
   </f:radioBlock>
   <f:radioBlock name="configurableByScan" value="scan" checked="${instance.isConfiguredByRepoScan()}" title="Github Repository Scan" inline="true">
@@ -35,10 +35,10 @@
       <f:entry title="${%Repository}" field="repositoryInternal">
         <f:select/>
       </f:entry>
-
+      <f:validateButton method="checkRepoScan" title="Validate" progress="Validating access..." with="repoOwnerInternal,repositoryInternal,apiUri,credentialsId"/>
     </f:nested>
   </f:radioBlock>
-  <f:validateButton method="" title="Validate" progress="Validating access..." with=""/>
+
   <script language="javascript" type="text/javascript" src="${rootURL}/plugin/github-branch-source/show.js"/>
 
   <f:entry title="${%Behaviours}">

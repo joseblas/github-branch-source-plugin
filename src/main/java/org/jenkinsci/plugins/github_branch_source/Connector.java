@@ -182,7 +182,7 @@ public class Connector {
         }
 
         if(isBlank(apiUri)){
-            return FormValidation.ok();
+            return FormValidation.ok("No server specified");
         }
 
         if (!scanCredentialsId.isEmpty()) {

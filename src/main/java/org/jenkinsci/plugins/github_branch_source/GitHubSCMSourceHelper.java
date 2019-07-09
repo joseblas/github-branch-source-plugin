@@ -26,6 +26,7 @@ package org.jenkinsci.plugins.github_branch_source;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.github.config.GitHubServerConfig;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
@@ -109,7 +110,7 @@ public class GitHubSCMSourceHelper {
         if (StringUtils.isNotBlank(rawUrl)) {
             return getRawUrlUri(rawUrl);
         } else if (isBlank(apiUri)) { //GitHub Repo
-            return "https://api.github.com";
+            return GitHubServerConfig.GITHUB_URL;
         }else {
             // GitHub Enterprise or rawUrl
             return apiUri;
@@ -138,7 +139,7 @@ public class GitHubSCMSourceHelper {
             throw new IllegalArgumentException("Repository URL not valid:" + rawUrl, e);
 
         }
-        return uri;
+        return GitHubConfiguration.normalizeApiUri(uri);
     }
 
     @SuppressFBWarnings
