@@ -189,13 +189,13 @@ public class GitHubSCMSource extends AbstractGitSCMSource {
      * The repository owner.
      */
     @CheckForNull
-    final String repoOwner;
+    String repoOwner;
 
     /**
      * The repository
      */
     @CheckForNull
-    final String repository;
+    String repository;
 
     /**
      * Raw URL for GitHub Server
@@ -318,9 +318,10 @@ public class GitHubSCMSource extends AbstractGitSCMSource {
      * Constructor, defaults to {@link #GITHUB_URL} as the end-point, and anonymous access, does not default any
      * {@link SCMSourceTrait} behaviours.
      *
-     * @param repoOwner the repository owner.
-     * @param repository the repository name.
+     * @param repoOwnerInternal the repository owner.
+     * @param repositoryInternal the repository name.
      * @param rawUrl HTTPs URL for the repo, as an alternative for repo scan using repoOwner/repository
+     * @param configurableByScan: show if uses 'scan' (for repo scan) or 'raw' (for https raw url)
      * @since 2.2.0
      */
     @DataBoundConstructor
@@ -328,10 +329,10 @@ public class GitHubSCMSource extends AbstractGitSCMSource {
         this.configurableByScan = configurableByScan;
         if(StringUtils.equals("raw", configurableByScan)) {
             this.rawUrl = rawUrl;
-            this.repoOwner = "";
-            this.repository = "";
+            this.repoOwner = null;
+            this.repository = null;
         }else{
-            this.rawUrl = "";
+            this.rawUrl = null;
             this.repoOwner = repoOwnerInternal;
             this.repository = repositoryInternal;
         }
@@ -346,6 +347,7 @@ public class GitHubSCMSource extends AbstractGitSCMSource {
      * @param repoOwner the repository owner.
      * @param repository the repository name.
      * @since 2.2.0
+     * @deprecated Use {@link #GitHubSCMSource(String, String, String, String)} instead.
      */
     @Deprecated
     public GitHubSCMSource(String repoOwner, String repository) {
@@ -386,7 +388,7 @@ public class GitHubSCMSource extends AbstractGitSCMSource {
 
     @Restricted(NoExternalUse.class)
     public boolean isConfiguredByRepoScan(){
-        return isBlank(this.rawUrl);
+        return StringUtils.equals("scan",getConfigurableByScan());
     }
 
 
@@ -408,10 +410,10 @@ public class GitHubSCMSource extends AbstractGitSCMSource {
      */
     @DataBoundSetter
     public void setApiUri(@CheckForNull String apiUri) {
-        if(isNotBlank(this.rawUrl)){
-            this.apiUri = "";
-        }else {
+        if(isConfiguredByRepoScan()){
             this.apiUri = GitHubConfiguration.normalizeApiUri(Util.fixEmptyAndTrim(apiUri));
+        }else {
+            this.apiUri = null;
         }
     }
 
@@ -455,6 +457,10 @@ public class GitHubSCMSource extends AbstractGitSCMSource {
         return repoOwner;
     }
 
+    @DataBoundSetter
+    public void setRepoOwner(String repoOwner){
+        this.repoOwner = repoOwner;
+    }
 
     /**
      * Gets the repository name.
@@ -466,18 +472,24 @@ public class GitHubSCMSource extends AbstractGitSCMSource {
         return GitHubSCMSourceHelper.build(this).repoName;
     }
 
+    @DataBoundSetter
+    public void setRepository(String repository){
+        this.repository = repository;
+    }
+
+
     @Nullable
     @Restricted(NoExternalUse.class)
     public String getRepositoryInternal() {
         return repository;
     }
+
     /**
      * Gets the rawUrl.
-         * @return the rawUrl.
+     * @return the rawUrl.
      */
-
-    @Exported
     @Nullable
+    @Restricted(NoExternalUse.class)
     public String getRawUrl() {
         return rawUrl;
     }
@@ -565,7 +577,7 @@ public class GitHubSCMSource extends AbstractGitSCMSource {
             setApiUri(apiUri);
         }
 
-        if( isBlank(this.rawUrl)){
+        if(isBlank(this.rawUrl)){
             configurableByScan = "scan";
         }else{
             configurableByScan = "raw";
@@ -2081,14 +2093,12 @@ public class GitHubSCMSource extends AbstractGitSCMSource {
         private void checkRepository(String path) throws IOException {
             if (isBlank(path))
                 throw new IOException("Illegal repository: "+ path);
-
             String[] split = path.split("/");
             if( split == null || split.length != 2){
                 throw new IOException("Illegal repository: "+ path);
             }else if( isBlank(split[0])|| isBlank(split[1])){
                 throw new IOException("Illegal repository: "+ path);
             }
-
         }
 
         @Restricted(NoExternalUse.class)

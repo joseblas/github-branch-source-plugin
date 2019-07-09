@@ -146,7 +146,7 @@ public class GitHubSCMSourceHelper {
     private static String getRepoFullName(GitHubSCMSource source) {
         String url = source.repoOwner + '/' + source.repository;
         if ( isEmpty(source.getApiUri())  ) {
-            if ("/".equals(url)) {
+            if (isBlank(source.repoOwner) && isBlank(source.repository)) {
                 try {
                     url = StringUtils.removeStart(new URL(source.getRawUrl()).getPath(), "/");
                 } catch (MalformedURLException e) {
