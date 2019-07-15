@@ -112,6 +112,8 @@ import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.github.config.GitHubServerConfig;
 import org.jenkinsci.plugins.github_branch_source.PullRequestSCMHead;
 import org.jenkinsci.plugins.github_branch_source.PullRequestSCMRevision;
+import org.jenkinsci.plugins.structs.describable.CustomDescribableModel;
+import org.jenkinsci.plugins.structs.describable.UninstantiatedDescribable;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -1835,7 +1837,7 @@ public class GitHubSCMSource extends AbstractGitSCMSource {
 
     @Symbol("github")
     @Extension
-    public static class DescriptorImpl extends SCMSourceDescriptor {
+    public static class DescriptorImpl extends SCMSourceDescriptor implements CustomDescribableModel {
 
         @Deprecated
         @Restricted(DoNotUse.class)
@@ -1876,6 +1878,21 @@ public class GitHubSCMSource extends AbstractGitSCMSource {
         @Initializer(before = InitMilestone.PLUGINS_STARTED)
         public static void addAliases() {
             XSTREAM2.addCompatibilityAlias("org.jenkinsci.plugins.github_branch_source.OriginGitHubSCMSource", GitHubSCMSource.class);
+        }
+
+
+        @Override public UninstantiatedDescribable customUninstantiate(UninstantiatedDescribable ud) {
+            // whatever...
+            Object scm = ud.getArguments().get("scm");
+            if (scm instanceof UninstantiatedDescribable) {
+                UninstantiatedDescribable scmUd = (UninstantiatedDescribable) scm;
+                Map<String, Object> scmArguments = new HashMap<>(scmUd.getArguments());
+                scmArguments.remove("id");
+                Map<String, Object> retrieverArguments = new HashMap<>(ud.getArguments());
+                retrieverArguments.put("scm", scmUd.withArguments(scmArguments));
+                return ud.withArguments(retrieverArguments);
+            }
+            return ud;
         }
 
         @Override
